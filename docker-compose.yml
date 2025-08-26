@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: helpdesk-postgres
+    environment:
+      POSTGRES_DB: helpdesk
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - helpdesk-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Go)
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: helpdesk-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password123
+      - DB_NAME=helpdesk
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - GIN_MODE=debug
+      - PORT=8080
+    volumes:
+      - ./backend:/app
+      - /app/tmp  # Excluir directorio tmp del volumen
+      - go_mod_cache:/go/pkg/mod  # Cache de módulos Go
+    networks:
+      - helpdesk-network
+    restart: unless-stopped
+
+  # Adminer para administrar la base de datos (opcional)
+  adminer:
+    image: adminer:4.8.1
+    container_name: helpdesk-adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - helpdesk-network
+    restart: unless-stopped
+
+networks:
+  helpdesk-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  go_mod_cache:
