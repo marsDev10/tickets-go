@@ -8,7 +8,7 @@ import (
 type Organization struct {
 	ID        int       `json:"id" db:"id"`
 	Name      string    `json:"name" db:"name"`
-	Domain    *string   `json:"domain,omitempty" db:"domain"`
+	Domain    *string   `json:"domain,omitempty" db:"domain" gorm:"not null;uniqueIndex"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 

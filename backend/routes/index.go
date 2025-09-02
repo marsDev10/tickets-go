@@ -19,6 +19,10 @@ func InitRouter() *mux.Router {
 	authRouter.HandleFunc("/login", LoginHandler).Methods("POST")
 	authRouter.HandleFunc("/register", RegisterHandler).Methods("POST")
 
+	organitationRouter := router.PathPrefix("/api/organitation").Subrouter()
+
+	organitationRouter.HandleFunc("/register", CreateOrganizationHandler).Methods("POST")
+
 	return router
 
 }

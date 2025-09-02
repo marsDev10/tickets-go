@@ -1,12 +1,26 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+// ParseJSON ayuda a decodificar un JSON del request
+func ParseJSON(r *http.Request, v interface{}) error {
+	return json.NewDecoder(r.Body).Decode(v)
+}
+
+// JSONResponse estandariza la respuesta en JSON
+func JSONResponse(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
+}
 
 // HashPassword hashea una contraseña usando bcrypt
 func HashPassword(password string) (string, error) {
