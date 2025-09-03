@@ -2,27 +2,25 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/marsDev10/helpdesk-backend/controllers"
+	"github.com/marsDev10/helpdesk-backend/utils"
 )
 
 func GetOrganizationUsersHandler(w http.ResponseWriter, r *http.Request) {
-	// 1️⃣ Obtener organization_id del parámetro de la URL
-	vars := mux.Vars(r)
-	orgIDStr := vars["id"] // o vars["org_id"] dependiendo de tu ruta
+	claims, err := utils.GetUserFromContext(r)
 
-	// 2️⃣ Validar y convertir organization_id
-	orgID, err := strconv.Atoi(orgIDStr)
-	if err != nil || orgID <= 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"error": "ID de organización inválido, debe ser un número positivo",
-		})
+	if err != nil {
+		utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
 		return
 	}
+
+	claimsJSON, _ := json.MarshalIndent(claims, "", "  ")
+	fmt.Println(string(claimsJSON))
 
 	// 3️⃣ Obtener parámetros opcionales para filtrado/paginación
 	page := r.URL.Query().Get("page")
@@ -47,7 +45,7 @@ func GetOrganizationUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 5️⃣ Verificar que la organización existe
-	orgExists, err := controllers.OrganizationExists(orgID)
+	orgExists, err := controllers.OrganizationExists(claims.OrganizationID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -65,7 +63,7 @@ func GetOrganizationUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 6️⃣ Obtener usuarios de la organización
-	users, total, err := controllers.GetUsersByOrganization(orgID, pageInt, limitInt, search, role)
+	users, total, err := controllers.GetUsersByOrganization(claims.OrganizationID, pageInt, limitInt, search, role)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -90,18 +88,16 @@ func GetOrganizationUsersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOrganizationUserHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	orgIDStr := vars["idOrganization"] // o vars["org_id"] dependiendo de tu ruta
-	userIDStr := vars["idUser"]        // o vars["org_id"] dependiendo de tu ruta
 
-	orgID, err := strconv.Atoi(orgIDStr)
-	if err != nil || orgID <= 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"error": "ID de organización inválido, debe ser un número positivo",
-		})
+	claims, err := utils.GetUserFromContext(r)
+
+	if err != nil {
+		utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
 		return
 	}
+
+	vars := mux.Vars(r)
+	userIDStr := vars["idUser"] // o vars["org_id"] dependiendo de tu ruta
 
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil || userID <= 0 {
@@ -113,7 +109,7 @@ func GetOrganizationUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 5️⃣ Verificar que la organización existe
-	userExist, err := controllers.GetUserByOrganization(orgID, userID)
+	userExist, err := controllers.GetUserByOrganization(claims.OrganizationID, userID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{

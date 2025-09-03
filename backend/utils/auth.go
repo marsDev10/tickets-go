@@ -39,18 +39,20 @@ func CheckPassword(password, hashedPassword string) bool {
 
 // Claims define la estructura del payload JWT
 type Claims struct {
-	UserID uint   `json:"user_id"`
-	Email  string `json:"email"`
-	Role   string `json:"role"`
+	OrganizationID int    `json:"organization_id"`
+	UserID         uint   `json:"user_id"`
+	Email          string `json:"email"`
+	Role           string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 // GenerateJWT genera un token JWT para un usuario
-func GenerateJWT(userID uint, email, role, secret string, expireHours int) (string, error) {
+func GenerateJWT(organizationID int, userID uint, email, role, secret string, expireHours int) (string, error) {
 	claims := &Claims{
-		UserID: userID,
-		Email:  email,
-		Role:   role,
+		OrganizationID: organizationID,
+		UserID:         userID,
+		Email:          email,
+		Role:           role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expireHours) * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

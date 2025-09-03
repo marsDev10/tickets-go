@@ -30,9 +30,9 @@ func InitRouter() *mux.Router {
 
 	usersRouter := protectedRouter.PathPrefix("/users").Subrouter()
 
-	usersRouter.HandleFunc("/{id}", GetOrganizationUsersHandler).Methods("GET")
+	usersRouter.HandleFunc("/organization", GetOrganizationUsersHandler).Methods("GET")
 
-	usersRouter.HandleFunc("/{idOrganization}/{idUser}", GetOrganizationUserHandler).Methods("Get")
+	usersRouter.HandleFunc("/organization/{idUser}", GetOrganizationUserHandler).Methods("Get")
 
 	return router
 }

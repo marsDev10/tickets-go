@@ -22,7 +22,7 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 	if search != "" {
 		searchPattern := "%" + strings.ToLower(search) + "%"
 		query = query.Where(
-			"LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR LOWER(username) LIKE ?",
+			"LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ? OR LOWER(email) LIKE ?",
 			searchPattern, searchPattern, searchPattern,
 		)
 	}
@@ -43,7 +43,7 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 	offset := (page - 1) * limit
 
 	err := query.
-		Select("id, first_name, last_name, email, role").
+		Select("id, first_name, last_name, email, role, organization_id").
 		Offset(offset).
 		Limit(limit).
 		Order("created_at DESC").
@@ -53,6 +53,7 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 }
 
 func GetUserByOrganization(orgID int, userID int) (*dtos.UserResponse, error) {
+
 	if orgID <= 0 {
 		return nil, errors.New("ID de organización inválido")
 	}

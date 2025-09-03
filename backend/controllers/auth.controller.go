@@ -28,7 +28,7 @@ func Login(dto *dtos.LoginDto) (map[string]interface{}, error) {
 
 	// Generar JWT
 	secret := os.Getenv("JWT_SECRET_KEY")
-	token, err := utils.GenerateJWT(user.ID, user.Email, user.Role, secret, 24)
+	token, err := utils.GenerateJWT(user.OrganizationID, user.ID, user.Email, user.Role, secret, 24)
 	if err != nil {
 		return nil, err
 	}
@@ -36,10 +36,11 @@ func Login(dto *dtos.LoginDto) (map[string]interface{}, error) {
 	// Retornar datos del usuario + token
 	return map[string]interface{}{
 		"user": map[string]interface{}{
-			"id":         user.ID,
-			"first_name": user.FirstName,
-			"email":      user.Email,
-			"role":       user.Role,
+			"id":              user.ID,
+			"first_name":      user.FirstName,
+			"email":           user.Email,
+			"role":            user.Role,
+			"organization_id": user.OrganizationID,
 		},
 		"token": token,
 	}, nil
