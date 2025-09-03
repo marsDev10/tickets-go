@@ -30,9 +30,23 @@ func InitRouter() *mux.Router {
 
 	usersRouter := protectedRouter.PathPrefix("/users").Subrouter()
 
-	usersRouter.HandleFunc("/organization", GetOrganizationUsersHandler).Methods("GET")
+	usersRouter.Handle("/organization",
+		middleware.RoleMiddleware("admin")(
+			http.HandlerFunc(GetOrganizationUsersHandler),
+		),
+	).Methods("GET")
 
-	usersRouter.HandleFunc("/organization/{idUser}", GetOrganizationUserHandler).Methods("Get")
+	usersRouter.Handle("/organization/{idUser}",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(GetOrganizationUserHandler),
+		),
+	).Methods("GET")
+
+	usersRouter.Handle("/",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(CreateUserHandler),
+		),
+	).Methods("POST")
 
 	return router
 }

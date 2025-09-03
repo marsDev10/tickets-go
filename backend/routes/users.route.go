@@ -135,3 +135,18 @@ func GetOrganizationUserHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 }
+
+func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	claims, _ := utils.GetUserFromContext(r)
+
+	claimsJSON, _ := json.MarshalIndent(claims, "", "  ")
+	fmt.Println(string(claimsJSON))
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Si cuentas con los privilegios requeridos",
+	})
+}
