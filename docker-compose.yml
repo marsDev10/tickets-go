@@ -53,6 +53,29 @@ services:
       - helpdesk-network
     restart: unless-stopped
 
+  # Frontend (React + Vite + TypeScript)
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: helpdesk-frontend
+    ports:
+      - "5173:5173"  # Puerto por defecto de Vite
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8080  # Variables de Vite usan VITE_ prefix
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Excluir node_modules del volumen
+    networks:
+      - helpdesk-network
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
   # Adminer para administrar la base de datos (opcional)
   adminer:
     image: adminer:4.8.1

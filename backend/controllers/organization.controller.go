@@ -6,6 +6,7 @@ import (
 
 	"github.com/marsDev10/helpdesk-backend/db"
 	"github.com/marsDev10/helpdesk-backend/dtos"
+	"github.com/marsDev10/helpdesk-backend/enums"
 	"github.com/marsDev10/helpdesk-backend/models"
 	"github.com/marsDev10/helpdesk-backend/utils"
 	"gorm.io/gorm"
@@ -46,6 +47,7 @@ func CreateOrganization(dto *dtos.CreateOrganizationDTO) error {
 		FirstName:      dto.AdminUser.FirstName,
 		LastName:       dto.AdminUser.LastName,
 		OrganizationID: org.ID,
+		Role:           string(enums.RoleAdmin),
 	}
 
 	if err := db.DB.Create(&adminUser).Error; err != nil {
@@ -53,4 +55,20 @@ func CreateOrganization(dto *dtos.CreateOrganizationDTO) error {
 	}
 
 	return nil
+}
+
+func OrganizationExists(id int) (bool, error) {
+	var existingOrg models.Organization
+
+	// Buscar la organización por ID
+	err := db.DB.Where("id = ?", id).First(&existingOrg).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil // No existe la organización
+		}
+		return false, err // Error de base de datos
+	}
+
+	// Si llegamos aquí, la organización existe
+	return true, nil
 }

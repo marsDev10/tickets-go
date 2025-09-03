@@ -4,8 +4,8 @@ FROM golang:1.24.3-alpine AS development
 # Instalar dependencias del sistema
 RUN apk add --no-cache git curl
 
-# Instalar Air para hot reload en desarrollo
-RUN go install github.com/air-verse/air@latest
+# Instalar Air para hot reload (usando cosmtrek/air que es más estable)
+RUN curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 
 # Configurar directorio de trabajo
 WORKDIR /app
@@ -18,6 +18,9 @@ RUN go mod download
 
 # Crear directorio tmp para Air
 RUN mkdir -p tmp
+
+# Copiar código fuente
+COPY . .
 
 # Exponer puerto
 EXPOSE 8080
@@ -35,9 +38,6 @@ WORKDIR /app
 # Copiar archivos de dependencias
 COPY go.mod go.sum ./
 RUN go mod download
-
-# Install the air binary so we get live code-reloading when we save files
-RUN curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
 
 # Copiar el resto del código
 COPY . .

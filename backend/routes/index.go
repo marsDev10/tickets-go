@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/marsDev10/helpdesk-backend/middleware"
 )
 
 func InitRouter() *mux.Router {
@@ -19,12 +20,21 @@ func InitRouter() *mux.Router {
 	authRouter.HandleFunc("/login", LoginHandler).Methods("POST")
 	authRouter.HandleFunc("/register", RegisterHandler).Methods("POST")
 
-	organitationRouter := router.PathPrefix("/api/organitation").Subrouter()
+	protectedRouter := router.PathPrefix("/api").Subrouter()
+
+	protectedRouter.Use(middleware.JWTMiddleware)
+
+	organitationRouter := protectedRouter.PathPrefix("/organitation").Subrouter()
 
 	organitationRouter.HandleFunc("/register", CreateOrganizationHandler).Methods("POST")
 
-	return router
+	usersRouter := protectedRouter.PathPrefix("/users").Subrouter()
 
+	usersRouter.HandleFunc("/{id}", GetOrganizationUsersHandler).Methods("GET")
+
+	usersRouter.HandleFunc("/{idOrganization}/{idUser}", GetOrganizationUserHandler).Methods("Get")
+
+	return router
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
