@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/marsDev10/helpdesk-backend/controllers"
+	"github.com/marsDev10/helpdesk-backend/dtos"
 	"github.com/marsDev10/helpdesk-backend/utils"
 )
 
@@ -137,16 +139,53 @@ func GetOrganizationUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	var dto dtos.CreateUserDto
+
+	// Decodificar el body en dto
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":  "Datos inválidos",
+			"detail": err.Error(),
+		})
+		return
+	}
+
+	// ✅ Validación con validator
+	validate := validator.New()
+	if err := validate.Struct(dto); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":  "Validación fallida",
+			"detail": err.Error(),
+		})
+		return
+	}
+
+	// Obtener claims (usuario autenticado)
 	claims, _ := utils.GetUserFromContext(r)
 
 	claimsJSON, _ := json.MarshalIndent(claims, "", "  ")
 	fmt.Println(string(claimsJSON))
 
+	// Pasar dto + orgID al servicio
+	user, err := controllers.CreateUser(&dto, claims.OrganizationID)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":  "No se pudo crear el usuario",
+			"detail": err.Error(),
+		})
+		return
+	}
+
+	// Respuesta correcta
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
-		"message": "Si cuentas con los privilegios requeridos",
+		"message": "Usuario creado correctamente",
+		"user":    user, // o bien devolver el modelo `User` que guardaste
 	})
 }

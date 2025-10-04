@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/marsDev10/helpdesk-backend/db"
 	"github.com/marsDev10/helpdesk-backend/dtos"
 	"github.com/marsDev10/helpdesk-backend/models"
+	"github.com/marsDev10/helpdesk-backend/utils"
 	"gorm.io/gorm"
 )
 
@@ -76,4 +78,53 @@ func GetUserByOrganization(orgID int, userID int) (*dtos.UserResponse, error) {
 	}
 
 	return &userResponse, nil
+}
+
+func CreateUser(dto *dtos.CreateUserDto, orgID int) (*models.User, error) {
+	var existingUser models.User
+
+	// Verificar si ya existe el email
+	err := db.DB.Where("email = ?", dto.Email).First(&existingUser).Error
+
+	if err == nil {
+		return nil, fmt.Errorf("el correo %s ya está registrado", dto.Email)
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	// Hashear contraseña
+	hashedPass, err := utils.HashPassword(dto.Password)
+	if err != nil {
+		return nil, fmt.Errorf("error al hashear contraseña: %v", err)
+	}
+
+	genderMap := map[string]uint{
+		"male":   1,
+		"female": 2,
+		"other":  3,
+	}
+
+	genderVal := genderMap[dto.Gender]
+
+	// Crear la entidad con el modelo
+	user := models.User{
+		FirstName:      dto.FirstName,
+		LastName:       dto.LastName,
+		Gender:         genderVal,
+		Email:          dto.Email,
+		Phone:          dto.Phone,
+		Password:       hashedPass,
+		Role:           dto.Role,
+		IsActive:       true, // por defecto
+		OrganizationID: orgID,
+	}
+
+	// Guardar en DB
+	if err := db.DB.Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

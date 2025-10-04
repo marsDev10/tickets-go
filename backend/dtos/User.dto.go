@@ -17,3 +17,15 @@ type UserResponse struct {
 	Role           string `json:"role"`
 	OrganizationID int    `json:"organization_id"`
 }
+
+type CreateUserDto struct {
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name"`
+	Gender    string `json:"gender" validate:"required"`
+	Phone     string `json:"phone" validate:"required"`
+	Email     string `json:"email" validate:"required"`
+	Password  string `json:"password" validate:"required"`
+	Role      string `json:"role" validate:"required"`
+
+	OrganizationID int `json:"organization_id" validate:"required"`
+}
