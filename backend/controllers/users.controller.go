@@ -45,12 +45,13 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 	offset := (page - 1) * limit
 
 	err := query.
-		Select("id, first_name, last_name, email, role, organization_id").
+		Select("id, first_name, last_name, email, role, organization_id, phone, gender, " +
+			"password, is_active, created_at, updated_at, deleted_at").
+		Where("is_active = true").
 		Offset(offset).
 		Limit(limit).
 		Order("created_at DESC").
 		Find(&users).Error
-
 	return users, total, err
 }
 
@@ -127,4 +128,73 @@ func CreateUser(dto *dtos.CreateUserDto, orgID int) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func UpdateUser(dto *dtos.UpdateUserDto, orgID int) (*models.User, error) {
+	// Verificar que el usuario existe
+	var user models.User
+	result := db.DB.Where("id = ? AND organization_id = ?", dto.ID, orgID).First(&user)
+	if result.Error != nil {
+		return nil, fmt.Errorf("usuario no encontrado: %v", result.Error)
+	}
+
+	// Crear un mapa con los campos a actualizar
+	updates := make(map[string]interface{})
+
+	if dto.FirstName != nil {
+		updates["first_name"] = *dto.FirstName
+	}
+	if dto.LastName != nil {
+		updates["last_name"] = *dto.LastName
+	}
+	if dto.Gender != nil {
+		// Convertir el género a uint
+		switch *dto.Gender {
+		case "male":
+			updates["gender"] = 1
+		case "female":
+			updates["gender"] = 2
+		case "other":
+			updates["gender"] = 3
+		default:
+			return nil, fmt.Errorf("género inválido: debe ser 'male', 'female' u 'other'")
+		}
+	}
+	if dto.Phone != nil {
+		updates["phone"] = *dto.Phone
+	}
+	if dto.Role != nil {
+		updates["role"] = *dto.Role
+	}
+
+	// Actualizar solo los campos modificados
+	if err := db.DB.Model(&user).Updates(updates).Error; err != nil {
+		return nil, fmt.Errorf("error actualizando usuario: %v", err)
+	}
+
+	// Recargar el usuario para obtener los datos actualizados
+	if err := db.DB.First(&user, dto.ID).Error; err != nil {
+		return nil, fmt.Errorf("error recargando usuario: %v", err)
+	}
+
+	return &user, nil
+}
+
+func ToggleUserStatus(userID int, orgID int) error {
+	var user models.User
+	result := db.DB.Unscoped().Where("id = ? AND organization_id = ?", userID, orgID).First(&user)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("usuario no encontrado")
+		}
+		return fmt.Errorf("error buscando usuario: %v", result.Error)
+	}
+
+	// Toggle is_active value
+	if err := db.DB.Model(&user).Update("is_active", !user.IsActive).Error; err != nil {
+		return fmt.Errorf("error actualizando estado del usuario: %v", err)
+	}
+
+	return nil
 }

@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -187,5 +188,80 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"message": "Usuario creado correctamente",
 		"user":    user, // o bien devolver el modelo `User` que guardaste
+	})
+}
+
+func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	var dto dtos.UpdateUserDto
+
+	// Imprimir la data de manera formateada
+	dtoJSON, _ := json.MarshalIndent(&dto, "", "    ")
+	log.Printf("📝 Datos recibidos para actualización:\n%s", string(dtoJSON))
+
+	// Decodificar el body en dto
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":  "Datos inválidos",
+			"detail": err.Error(),
+		})
+		return
+	}
+
+	// ✅ Validación con validator
+	validate := validator.New()
+	if err := validate.Struct(&dto); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":  "Validación fallida",
+			"detail": err.Error(),
+		})
+		return
+	}
+
+	// Obtener claims (usuario autenticado)
+	claims, err := utils.GetUserFromContext(r)
+	if err != nil {
+		utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
+		return
+	}
+
+	// Pasar dto + orgID al servicio
+	user, err := controllers.UpdateUser(&dto, claims.OrganizationID)
+	if err != nil {
+		utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Error al actualizar", err.Error()))
+		return
+	}
+
+	// Respuesta correcta
+	utils.JSONResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Usuario actualizado correctamente",
+		"user":    user,
+	})
+}
+
+func ToggleUserStatusHandler(w http.ResponseWriter, r *http.Request) {
+	var dto dtos.ToggleStatusUser
+
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Datos inválidos", err.Error()))
+		return
+	}
+
+	claims, err := utils.GetUserFromContext(r)
+	if err != nil {
+		utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
+		return
+	}
+
+	if err := controllers.ToggleUserStatus(dto.ID, claims.OrganizationID); err != nil {
+		utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Error al cambiar estado", err.Error()))
+		return
+	}
+
+	utils.JSONResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Estado del usuario actualizado correctamente",
 	})
 }

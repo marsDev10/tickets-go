@@ -48,6 +48,18 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("POST")
 
+	usersRouter.Handle("/",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(UpdateUserHandler),
+		),
+	).Methods("PUT")
+
+	usersRouter.Handle("/status",
+		middleware.RoleMiddleware("admin")(
+			http.HandlerFunc(ToggleUserStatusHandler),
+		),
+	).Methods("POST")
+
 	return router
 }
 

@@ -1,7 +1,7 @@
 package dtos
 
 type GetUsersDto struct {
-	id string `json:"id" validate:"required"`
+	ID int `json:"id" validate:"required"`
 }
 
 type GetUsersData struct {
@@ -26,6 +26,17 @@ type CreateUserDto struct {
 	Email     string `json:"email" validate:"required"`
 	Password  string `json:"password" validate:"required"`
 	Role      string `json:"role" validate:"required"`
+}
 
-	OrganizationID int `json:"organization_id" validate:"required"`
+type UpdateUserDto struct {
+	ID        int     `json:"id" validate:"required"`
+	FirstName *string `json:"first_name,omitempty"`
+	LastName  *string `json:"last_name,omitempty"`
+	Gender    *string `json:"gender,omitempty"`
+	Phone     *string `json:"phone,omitempty"`
+	Role      *string `json:"role,omitempty"`
+}
+
+type ToggleStatusUser struct {
+	ID int `json:"id" validate:"required"`
 }
