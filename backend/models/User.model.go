@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"github.com/marsDev10/helpdesk-backend/enums"
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -14,8 +17,14 @@ type User struct {
 	Role      string `gorm:"not null" json:"role"`
 	IsActive  bool   `gorm:"default:true" json:"is_active"`
 
+	// Rol a nivel organizacional (para permisos globales)
+	GlobalRole enums.UserRole `gorm:"type:varchar(50);default:'member'" json:"global_role"`
+
 	OrganizationID int           `gorm:"not null" json:"organization_id"`
 	Organization   *Organization `gorm:"foreignKey:OrganizationID" json:"-"`
+
+	// Relación many-to-many con equipos a través de TeamMember
+	TeamMemberships []TeamMember `gorm:"foreignKey:UserID" json:"team_memberships,omitempty"`
 }
 
 // Método para obtener nombre completo

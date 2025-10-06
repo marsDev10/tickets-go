@@ -47,7 +47,7 @@ func CreateOrganization(dto *dtos.CreateOrganizationDTO) error {
 		FirstName:      dto.AdminUser.FirstName,
 		LastName:       dto.AdminUser.LastName,
 		OrganizationID: org.ID,
-		Role:           string(enums.RoleAdmin),
+		Role:           string(enums.Admin),
 	}
 
 	if err := db.DB.Create(&adminUser).Error; err != nil {

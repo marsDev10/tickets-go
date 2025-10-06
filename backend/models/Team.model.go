@@ -5,12 +5,18 @@ import (
 )
 
 // Modelo de Equipos
+// Team - Equipo de trabajo
 type Team struct {
-	ID          int       `json:"id" db:"id"`
-	Name        string    `json:"name" db:"name"`
-	Description *string   `json:"description,omitempty" db:"description"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Name        string    `gorm:"not null" json:"name"`
+	Description *string   `json:"description,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 
-	// Miembros del equipo
-	Members []User `json:"members,omitempty" db:"-"`
+	// Relación con la organización
+	OrganizationID uint          `gorm:"not null" json:"organization_id"`
+	Organization   *Organization `gorm:"foreignKey:OrganizationID" json:"organization,omitempty"`
+
+	// Relación many-to-many con usuarios
+	Members []TeamMember `gorm:"foreignKey:TeamID" json:"members,omitempty"`
 }

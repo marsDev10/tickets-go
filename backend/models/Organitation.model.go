@@ -13,4 +13,5 @@ type Organization struct {
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 
 	Users []User `json:"users,omitempty" gorm:"foreignKey:OrganizationID"`
+	Teams []Team `gorm:"foreignKey:OrganizationID" json:"teams,omitempty"`
 }

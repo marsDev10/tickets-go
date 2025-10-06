@@ -24,6 +24,7 @@ func main() {
 		&models.TicketTag{},
 		&models.SLAPolicy{},
 		&models.Setting{},
+		&models.Team{},
 		&models.TeamMember{},
 		&models.TicketConversation{},
 	)

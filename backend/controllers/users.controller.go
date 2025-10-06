@@ -67,7 +67,7 @@ func GetUserByOrganization(orgID int, userID int) (*dtos.UserResponse, error) {
 	var userResponse dtos.UserResponse
 
 	err := db.DB.Model(&models.User{}).
-		Select("id, first_name, last_name, email, role, organization_id").
+		Select("id, first_name, last_name, email, role, organization_id, team").
 		Where("organization_id = ? AND id = ?", orgID, userID).
 		First(&userResponse).Error
 
