@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/marsDev10/helpdesk-backend/db"
+	"github.com/marsDev10/helpdesk-backend/enums"
 	"github.com/marsDev10/helpdesk-backend/models"
 	"gorm.io/gorm"
 )
@@ -62,7 +63,7 @@ func GetTeamByID(orgID int, teamID int) (*models.Team, error) {
 }
 
 // Create Team
-func CreateTeam(teamID, orgID int, name, description string) (*models.Team, error) {
+func CreateTeam(orgID int, name, description string) (*models.Team, error) {
 
 	var existing models.Team
 
@@ -70,7 +71,7 @@ func CreateTeam(teamID, orgID int, name, description string) (*models.Team, erro
 		Where("organization_id = ? AND name = ?", orgID, name).First(&existing).Error
 
 	if err == nil {
-		return nil, fmt.Errorf("Ya existe un equipo con el nombre '%s' en esta organización", name)
+		return nil, fmt.Errorf("ya existe un equipo con el nombre '%s' en esta organización", name)
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -90,4 +91,45 @@ func CreateTeam(teamID, orgID int, name, description string) (*models.Team, erro
 	}
 
 	return &team, nil
+}
+
+// AddMemberToTeam agrega un usuario a un equipo con un rol específico
+func AddMemberToTeam(teamID, userID, orgID int, role enums.UserRole) error {
+	// Validar que el rol sea válido para equipos
+	if !role.IsTeamRole() {
+		return errors.New("rol inválido para equipo")
+	}
+
+	// Verificar que el equipo existe y pertenece a la organización
+	var team models.Team
+	if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).First(&team).Error; err != nil {
+		return errors.New("equipo no encontrado")
+	}
+
+	// Verificar que el usuario existe y pertenece a la misma organización
+	var user models.User
+	if err := db.DB.Where("id = ? AND organization_id = ?", userID, orgID).First(&user).Error; err != nil {
+		return errors.New("usuario no encontrado en la organización")
+	}
+
+	// Verificar que el usuario no esté ya en el equipo
+	var existingMember models.TeamMember
+	err := db.DB.Where("team_id = ? AND user_id = ?", teamID, userID).First(&existingMember).Error
+
+	if err == nil {
+		return errors.New("el usuario ya es miembro del equipo")
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	// Crear la membresía
+	member := models.TeamMember{
+		TeamID: uint(teamID),
+		UserID: uint(userID),
+		Role:   role,
+	}
+
+	return db.DB.Create(&member).Error
 }
