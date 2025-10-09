@@ -92,5 +92,5 @@ Para una orquestación de producción, considera crear `docker-compose.prod.yml`
 
 **Licencia**
 
-- MIT
+- MIT ( Prueba )
 
