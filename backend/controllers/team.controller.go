@@ -1,14 +1,14 @@
 package controllers
 
 import (
-	"errors"
-	"fmt"
+    "errors"
+    "fmt"
 
-	"github.com/marsDev10/helpdesk-backend/db"
-	"github.com/marsDev10/helpdesk-backend/dtos"
-	"github.com/marsDev10/helpdesk-backend/enums"
-	"github.com/marsDev10/helpdesk-backend/models"
-	"gorm.io/gorm"
+    "github.com/marsDev10/helpdesk-backend/db"
+    "github.com/marsDev10/helpdesk-backend/dtos"
+    "github.com/marsDev10/helpdesk-backend/enums"
+    "github.com/marsDev10/helpdesk-backend/models"
+    "gorm.io/gorm"
 )
 
 func GetTeamByOrganization(orgID int, page, limit int, search string) ([]models.Team, int64, error) {
@@ -110,6 +110,47 @@ func CreateTeam(orgID int, name, description string) (*models.Team, error) {
 	}
 
 	return &team, nil
+}
+
+// UpdateTeam actualiza campos del equipo (nombre, descripción) dentro de la misma organización
+func UpdateTeam(orgID, teamID int, dto dtos.UpdateTeamDto) (*models.Team, error) {
+    var team models.Team
+
+    if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).First(&team).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, errors.New("equipo no encontrado")
+        }
+        return nil, err
+    }
+
+    // Validar unicidad del nombre si se envía uno nuevo
+    if dto.Name != nil {
+        var exists models.Team
+        if err := db.DB.
+            Where("organization_id = ? AND LOWER(name) = LOWER(?) AND id <> ?", orgID, *dto.Name, teamID).
+            First(&exists).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, err
+        } else if err == nil {
+            return nil, fmt.Errorf("ya existe un equipo con el nombre '%s' en esta organización", *dto.Name)
+        }
+        team.Name = *dto.Name
+    }
+
+    if dto.Description != nil {
+        // Permite setear a vacío si viene "" o a nil si se requiere omitir
+        desc := *dto.Description
+        team.Description = &desc
+        if desc == "" {
+            // Si prefieres que vacío signifique NULL, descomenta:
+            // team.Description = nil
+        }
+    }
+
+    if err := db.DB.Save(&team).Error; err != nil {
+        return nil, err
+    }
+
+    return &team, nil
 }
 
 // AddMemberToTeam agrega un usuario a un equipo con un rol específico

@@ -104,6 +104,46 @@ func CreateTeamHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func UpdateTeamHandler(w http.ResponseWriter, r *http.Request) {
+    var dto dtos.UpdateTeamDto
+
+    if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Datos inválidos", err.Error()))
+        return
+    }
+
+    validate := validator.New()
+    if err := validate.Struct(dto); err != nil {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Validación fallida", err.Error()))
+        return
+    }
+
+    claims, err := utils.GetUserFromContext(r)
+    if err != nil {
+        utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
+        return
+    }
+
+    vars := mux.Vars(r)
+    teamID, err := strconv.Atoi(vars["team_id"])
+    if err != nil || teamID <= 0 {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("team_id inválido", ""))
+        return
+    }
+
+    team, err := controllers.UpdateTeam(claims.OrganizationID, teamID, dto)
+    if err != nil {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Error al actualizar equipo", err.Error()))
+        return
+    }
+
+    utils.JSONResponse(w, http.StatusOK, map[string]interface{}{
+        "success": true,
+        "message": "Equipo actualizado exitosamente",
+        "data":    team,
+    })
+}
+
 func AddMemberToTeamHandler(w http.ResponseWriter, r *http.Request) {
 	var dto dtos.AddTeamMemberDto
 
