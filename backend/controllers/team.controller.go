@@ -152,3 +152,32 @@ func AddMemberToTeam(teamID, userID, orgID int, role enums.UserRole) error {
 
 	return db.DB.Create(&member).Error
 }
+
+// DeleteMemberToTeam
+func RemoveMemberFromTeam(teamID, userID, orgID int) error {
+    // Verificar que el equipo existe y pertenece a la organización
+    var team models.Team
+    if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).First(&team).Error; err != nil {
+        return errors.New("equipo no encontrado")
+    }
+
+    // Verificar que el usuario existe y pertenece a la organización
+    var user models.User
+    if err := db.DB.Where("id = ? AND organization_id = ?", userID, orgID).First(&user).Error; err != nil {
+        return errors.New("usuario no encontrado en la organización")
+    }
+
+    // Eliminar la membresía específica del equipo
+    result := db.DB.Where("team_id = ? AND user_id = ?", teamID, userID).
+        Delete(&models.TeamMember{})
+
+    if result.Error != nil {
+        return fmt.Errorf("error al eliminar membresía del equipo: %v", result.Error)
+    }
+
+    if result.RowsAffected == 0 {
+        return errors.New("el usuario no pertenece a este equipo")
+    }
+
+    return nil
+}

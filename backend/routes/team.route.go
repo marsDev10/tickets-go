@@ -145,3 +145,38 @@ func AddMemberToTeamHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Miembro agregado exitosamente",
 	})
 }
+
+func RemoveMemberFromTeamHandler(w http.ResponseWriter, r *http.Request) {
+    claims, err := utils.GetUserFromContext(r)
+
+    if err != nil {
+        utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
+        return
+    }
+
+    vars := mux.Vars(r)
+
+    teamID, err := strconv.Atoi(vars["team_id"])
+    if err != nil || teamID <= 0 {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("team_id inválido", ""))
+        return
+    }
+
+    userID, err := strconv.Atoi(vars["user_id"])
+    if err != nil || userID <= 0 {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("user_id inválido", ""))
+        return
+    }
+
+    err = controllers.RemoveMemberFromTeam(teamID, userID, claims.OrganizationID)
+
+    if err != nil {
+        utils.JSONResponse(w, http.StatusBadRequest, utils.ErrorResponse("Error al eliminar miembro", err.Error()))
+        return
+    }
+
+    utils.JSONResponse(w, http.StatusOK, map[string]interface{}{
+        "success": true,
+        "message": "Miembro eliminado del equipo exitosamente",
+    })
+}

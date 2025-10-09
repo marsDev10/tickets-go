@@ -68,11 +68,11 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("POST")
 
-	teamRouter.Handle("/{team_id}/member",
-		middleware.RoleMiddleware("admin", "manager")(
-			http.HandlerFunc(AddMemberToTeamHandler),
-		),
-	).Methods("POST")
+    teamRouter.Handle("/{team_id}/members",
+        middleware.RoleMiddleware("admin", "manager")(
+            http.HandlerFunc(AddMemberToTeamHandler),
+        ),
+    ).Methods("POST")
 
 	teamRouter.Handle("/all",
 		middleware.RoleMiddleware("admin", "manager")(
@@ -80,7 +80,14 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("GET")
 
+    teamRouter.Handle("/{team_id}/members/{user_id}",
+        middleware.RoleMiddleware("admin", "manager")(
+            http.HandlerFunc(RemoveMemberFromTeamHandler),
+        ),
+    ).Methods("DELETE")
+
 	return router
+
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
