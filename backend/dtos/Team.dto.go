@@ -46,3 +46,19 @@ type UserSummary struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 }
+
+//Team Response
+
+type TeamMembersByOrganizationResponse struct {
+	ID      uint          `json:"id"`
+	Name    string        `json:"name"`
+	Members []MemberBasic `json:"members"`
+}
+
+type MemberBasic struct {
+	ID        uint   `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+}

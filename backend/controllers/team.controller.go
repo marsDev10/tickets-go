@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/marsDev10/helpdesk-backend/db"
+	"github.com/marsDev10/helpdesk-backend/dtos"
 	"github.com/marsDev10/helpdesk-backend/enums"
 	"github.com/marsDev10/helpdesk-backend/models"
 	"gorm.io/gorm"
@@ -35,6 +36,7 @@ func GetTeamByOrganization(orgID int, page, limit int, search string) ([]models.
 
 	err := query.
 		Preload("Members").
+		Preload("Members.User").
 		Offset(offset).
 		Limit(limit).
 		Order("created_at DESC").
@@ -43,23 +45,40 @@ func GetTeamByOrganization(orgID int, page, limit int, search string) ([]models.
 	return teams, total, err
 }
 
-// GeTeamByID get team by id
-func GetTeamByID(orgID int, teamID int) (*models.Team, error) {
-	var team models.Team
+func GetTeamsByOrganization(orgID int) ([]dtos.TeamMembersByOrganizationResponse, error) {
+	var teams []models.Team
 
 	err := db.DB.
-		Preload("Members").
-		Where("organization_id = ? AND id = ?", orgID, teamID).
-		First(&team).Error
+		Model(&models.Team{}).
+		Where("organization_id = ?", orgID).
+		Preload("Members.User").
+		Find(&teams).Error
 
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("equipo no encontrado")
-		}
 		return nil, err
 	}
 
-	return &team, nil
+	var result []dtos.TeamMembersByOrganizationResponse
+	for _, t := range teams {
+		var members []dtos.MemberBasic
+		for _, m := range t.Members {
+			members = append(members, dtos.MemberBasic{
+				Role:      string(m.Role),
+				ID:        uint(m.User.ID),
+				FirstName: m.User.FirstName,
+				LastName:  m.User.LastName,
+				Email:     m.User.Email,
+			})
+		}
+
+		result = append(result, dtos.TeamMembersByOrganizationResponse{
+			ID:      t.ID,
+			Name:    t.Name,
+			Members: members,
+		})
+	}
+
+	return result, nil
 }
 
 // Create Team

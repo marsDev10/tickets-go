@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,59 @@ import (
 	"github.com/marsDev10/helpdesk-backend/enums"
 	"github.com/marsDev10/helpdesk-backend/utils"
 )
+
+func GetTeamsByOrganizationHandler(w http.ResponseWriter, r *http.Request) {
+
+	claims, err := utils.GetUserFromContext(r)
+
+	if err != nil {
+		utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("No autorizado", err.Error()))
+		return
+	}
+
+	claimsJSON, _ := json.MarshalIndent(claims, "", "  ")
+
+	fmt.Println(string(claimsJSON))
+
+	// Check organizations exists
+	orgExist, err := controllers.OrganizationExists(claims.OrganizationID)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error": "Error al verficar la organización",
+		})
+	}
+
+	if !orgExist {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error": "Organización no encontrada",
+		})
+	}
+
+	// Get teams by organization
+	teams, err := controllers.GetTeamsByOrganization(claims.OrganizationID)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error": "Error al obtener los equipos",
+		})
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Equipos obtenidos exitosamente",
+		"data":    teams,
+	})
+
+}
 
 func CreateTeamHandler(w http.ResponseWriter, r *http.Request) {
 	var dto dtos.CreateTeamDto

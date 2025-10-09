@@ -36,9 +36,6 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Hot Reload :DDDD x2")
-	log.Printf("Hot Reload :DDDD x3")
-
 	log.Printf("Servidor corriendo en el puerto %s 🚀", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

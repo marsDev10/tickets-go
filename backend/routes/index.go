@@ -60,7 +60,7 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("POST")
 
-	teamRouter := protectedRouter.PathPrefix("/team").Subrouter()
+	teamRouter := protectedRouter.PathPrefix("/teams").Subrouter()
 
 	teamRouter.Handle("/",
 		middleware.RoleMiddleware("admin", "manager")(
@@ -73,6 +73,12 @@ func InitRouter() *mux.Router {
 			http.HandlerFunc(AddMemberToTeamHandler),
 		),
 	).Methods("POST")
+
+	teamRouter.Handle("/all",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(GetTeamsByOrganizationHandler),
+		),
+	).Methods("GET")
 
 	return router
 }

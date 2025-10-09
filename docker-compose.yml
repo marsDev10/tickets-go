@@ -31,6 +31,8 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: helpdesk-backend
+    working_dir: /app
+    command: ["air", "-c", ".air.toml"]
     ports:
       - "8080:8080"
     depends_on:
@@ -45,10 +47,11 @@ services:
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
       - GIN_MODE=debug
       - PORT=8080
+      - CGO_ENABLED=0
     volumes:
       - ./backend:/app
-      - /app/tmp  # Excluir directorio tmp del volumen
       - go_mod_cache:/go/pkg/mod  # Cache de módulos Go
+      - go_build_cache:/root/.cache/go-build  # Cache de build
     networks:
       - helpdesk-network
     restart: unless-stopped
@@ -95,3 +98,4 @@ networks:
 volumes:
   postgres_data:
   go_mod_cache:
+  go_build_cache:

@@ -134,7 +134,7 @@ func GetOrganizationUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
-		"user":    userExist,
+		"data":    userExist,
 	})
 
 }
@@ -187,7 +187,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "Usuario creado correctamente",
-		"user":    user, // o bien devolver el modelo `User` que guardaste
+		"data":    user, // o bien devolver el modelo `User` que guardaste
 	})
 }
 
@@ -237,7 +237,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "Usuario actualizado correctamente",
-		"user":    user,
+		"data":    user,
 	})
 }
 
