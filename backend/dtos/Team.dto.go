@@ -50,9 +50,10 @@ type UserSummary struct {
 //Team Response
 
 type TeamMembersByOrganizationResponse struct {
-	ID      uint          `json:"id"`
-	Name    string        `json:"name"`
-	Members []MemberBasic `json:"members"`
+	ID          uint          `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description,omitempty"`
+	Members     []MemberBasic `json:"members"`
 }
 
 type MemberBasic struct {

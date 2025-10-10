@@ -17,16 +17,9 @@ func main() {
 	db.DB.AutoMigrate(
 		&models.Organization{},
 		&models.User{},
-		&models.Category{},
 		&models.Ticket{},
-		&models.Attachment{},
-		&models.Tag{},
-		&models.TicketTag{},
-		&models.SLAPolicy{},
-		&models.Setting{},
 		&models.Team{},
 		&models.TeamMember{},
-		&models.TicketConversation{},
 	)
 
 	router := routes.InitRouter()

@@ -25,6 +25,15 @@ type User struct {
 
 	// Relación many-to-many con equipos a través de TeamMember
 	TeamMemberships []TeamMember `gorm:"foreignKey:UserID" json:"team_memberships,omitempty"`
+
+	// Relación one-to-many con tickets asignados
+	AssignedTickets []Ticket `gorm:"foreignKey:AssigneeID" json:"assigned_tickets,omitempty"`
+
+	// Relación one-to-many con tickets creados (solicitados)
+	RequestedTickets []Ticket `gorm:"foreignKey:RequesterID" json:"requested_tickets,omitempty"`
+
+	// Relación one-to-many con tickets creados (creados por)
+	CreatedTickets []Ticket `gorm:"foreignKey:CreatedByID" json:"created_tickets,omitempty"`
 }
 
 // Método para obtener nombre completo

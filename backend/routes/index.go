@@ -60,6 +60,39 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("POST")
 
+    // Tickets router
+    ticketsRouter := protectedRouter.PathPrefix("/tickets").Subrouter()
+
+    ticketsRouter.Handle("/",
+        middleware.RoleMiddleware("admin", "manager", "agent", "member")(
+            http.HandlerFunc(CreateTicketHandler),
+        ),
+    ).Methods("POST")
+
+    ticketsRouter.Handle("/",
+        middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
+            http.HandlerFunc(ListTicketsHandler),
+        ),
+    ).Methods("GET")
+
+    ticketsRouter.Handle("/{ticket_id}",
+        middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
+            http.HandlerFunc(GetTicketHandler),
+        ),
+    ).Methods("GET")
+
+    ticketsRouter.Handle("/{ticket_id}",
+        middleware.RoleMiddleware("admin", "manager", "agent")(
+            http.HandlerFunc(UpdateTicketHandler),
+        ),
+    ).Methods("PUT")
+
+    ticketsRouter.Handle("/{ticket_id}/assign",
+        middleware.RoleMiddleware("admin", "manager", "supervisor")(
+            http.HandlerFunc(AssignTicketHandler),
+        ),
+    ).Methods("POST")
+
     teamRouter := protectedRouter.PathPrefix("/teams").Subrouter()
 
     teamRouter.Handle("/",
