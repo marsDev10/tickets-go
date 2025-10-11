@@ -13,6 +13,9 @@ func InitRouter() *mux.Router {
 
 	router := mux.NewRouter()
 
+	// Redirect to route with or without trailing slash
+	router.StrictSlash(true)
+
 	router.Use(loggingMiddleware)
 
 	authRouter := router.PathPrefix("/api/auth").Subrouter()
@@ -60,58 +63,64 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("POST")
 
-    // Tickets router
-    ticketsRouter := protectedRouter.PathPrefix("/tickets").Subrouter()
+	// Tickets router
+	ticketsRouter := protectedRouter.PathPrefix("/tickets").Subrouter()
 
-    ticketsRouter.Handle("/",
-        middleware.RoleMiddleware("admin", "manager", "agent", "member")(
-            http.HandlerFunc(CreateTicketHandler),
-        ),
-    ).Methods("POST")
+	ticketsRouter.Handle("/",
+		middleware.RoleMiddleware("admin", "manager", "agent", "member")(
+			http.HandlerFunc(CreateTicketHandler),
+		),
+	).Methods("POST")
 
-    ticketsRouter.Handle("/",
-        middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
-            http.HandlerFunc(ListTicketsHandler),
-        ),
-    ).Methods("GET")
+	ticketsRouter.Handle("/{ticket_id}",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(DeleteTicketHandler),
+		),
+	).Methods("DELETE")
 
-    ticketsRouter.Handle("/{ticket_id}",
-        middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
-            http.HandlerFunc(GetTicketHandler),
-        ),
-    ).Methods("GET")
+	ticketsRouter.Handle("/",
+		middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
+			http.HandlerFunc(ListTicketsHandler),
+		),
+	).Methods("GET")
 
-    ticketsRouter.Handle("/{ticket_id}",
-        middleware.RoleMiddleware("admin", "manager", "agent")(
-            http.HandlerFunc(UpdateTicketHandler),
-        ),
-    ).Methods("PUT")
+	ticketsRouter.Handle("/{ticket_id}",
+		middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
+			http.HandlerFunc(GetTicketHandler),
+		),
+	).Methods("GET")
 
-    ticketsRouter.Handle("/{ticket_id}/assign",
-        middleware.RoleMiddleware("admin", "manager", "supervisor")(
-            http.HandlerFunc(AssignTicketHandler),
-        ),
-    ).Methods("POST")
+	ticketsRouter.Handle("/{ticket_id}",
+		middleware.RoleMiddleware("admin", "manager", "agent")(
+			http.HandlerFunc(UpdateTicketHandler),
+		),
+	).Methods("PATCH")
 
-    teamRouter := protectedRouter.PathPrefix("/teams").Subrouter()
+	ticketsRouter.Handle("/{ticket_id}/assign",
+		middleware.RoleMiddleware("admin", "manager", "supervisor")(
+			http.HandlerFunc(AssignTicketHandler),
+		),
+	).Methods("POST")
 
-    teamRouter.Handle("/",
-        middleware.RoleMiddleware("admin", "manager")(
-            http.HandlerFunc(CreateTeamHandler),
-        ),
-    ).Methods("POST")
+	teamRouter := protectedRouter.PathPrefix("/teams").Subrouter()
 
-    teamRouter.Handle("/{team_id}",
-        middleware.RoleMiddleware("admin", "manager")(
-            http.HandlerFunc(UpdateTeamHandler),
-        ),
-    ).Methods("PUT")
+	teamRouter.Handle("/",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(CreateTeamHandler),
+		),
+	).Methods("POST")
 
-    teamRouter.Handle("/{team_id}/members",
-        middleware.RoleMiddleware("admin", "manager")(
-            http.HandlerFunc(AddMemberToTeamHandler),
-        ),
-    ).Methods("POST")
+	teamRouter.Handle("/{team_id}",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(UpdateTeamHandler),
+		),
+	).Methods("PUT")
+
+	teamRouter.Handle("/{team_id}/members",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(AddMemberToTeamHandler),
+		),
+	).Methods("POST")
 
 	teamRouter.Handle("/all",
 		middleware.RoleMiddleware("admin", "manager")(
@@ -119,11 +128,11 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("GET")
 
-    teamRouter.Handle("/{team_id}/members/{user_id}",
-        middleware.RoleMiddleware("admin", "manager")(
-            http.HandlerFunc(RemoveMemberFromTeamHandler),
-        ),
-    ).Methods("DELETE")
+	teamRouter.Handle("/{team_id}/members/{user_id}",
+		middleware.RoleMiddleware("admin", "manager")(
+			http.HandlerFunc(RemoveMemberFromTeamHandler),
+		),
+	).Methods("DELETE")
 
 	return router
 

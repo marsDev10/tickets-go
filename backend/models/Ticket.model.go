@@ -27,8 +27,10 @@ type Ticket struct {
 	// Enrutamiento por equipo (para managers)
 	TeamID *uint
 	Team   *Team `gorm:"foreignKey:TeamID"`
-	/* CategoryID     uint */
-	/* Category       Category `gorm:"foreignKey:CategoryID"` */
+	// Clasificacion del ticket
+	CategoryID *uint     `gorm:"index" json:"category_id,omitempty"`
+	Category   *Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
+
 	OrganizationID uint
 	Organization   Organization `gorm:"foreignKey:OrganizationID"`
 

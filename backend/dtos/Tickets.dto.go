@@ -49,4 +49,5 @@ type TicketResponseDto struct {
 	CreatedByID  uint   `json:"created_by_id"`
 	AssigneeID   *uint  `json:"assignee_id,omitempty"`
 	TeamID       *uint  `json:"team_id,omitempty"`
+	CategoryID   *uint  `json:"category_id,omitempty"`
 }

@@ -3,19 +3,23 @@ package dtos
 type CreateTeamDto struct {
 	Name        string `json:"name" validate:"required,min=3,max=100"`
 	Description string `json:"description" validate:"max=500"`
+	CategoryID  *int   `json:"category_id,omitempty" validate:"omitempty,gt=0"`
 }
 
 type UpdateTeamDto struct {
 	Name        *string `json:"name,omitempty" validate:"omitempty,min=3,max=100"`
 	Description *string `json:"description,omitempty" validate:"omitempty,max=500"`
+	CategoryID  *int    `json:"category_id,omitempty" validate:"omitempty,gte=0"`
 }
 
 type TeamResponse struct {
-	ID             uint   `json:"id"`
-	Name           string `json:"name"`
-	Description    string `json:"description,omitempty"`
-	OrganizationID uint   `json:"organization_id"`
-	MemberCount    int    `json:"member_count,omitempty"`
+	ID             uint    `json:"id"`
+	Name           string  `json:"name"`
+	Description    string  `json:"description,omitempty"`
+	OrganizationID uint    `json:"organization_id"`
+	MemberCount    int     `json:"member_count,omitempty"`
+	CategoryID     *uint   `json:"category_id,omitempty"`
+	CategoryName   *string `json:"category_name,omitempty"`
 }
 
 // ====================================
@@ -50,10 +54,12 @@ type UserSummary struct {
 //Team Response
 
 type TeamMembersByOrganizationResponse struct {
-	ID          uint          `json:"id"`
-	Name        string        `json:"name"`
-	Description string        `json:"description,omitempty"`
-	Members     []MemberBasic `json:"members"`
+	ID           uint          `json:"id"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description,omitempty"`
+	Members      []MemberBasic `json:"members"`
+	CategoryID   *uint         `json:"category_id,omitempty"`
+	CategoryName *string       `json:"category_name,omitempty"`
 }
 
 type MemberBasic struct {

@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/marsDev10/helpdesk-backend/db"
 	"github.com/marsDev10/helpdesk-backend/dtos"
@@ -17,7 +18,7 @@ func GetTeamByOrganization(orgID int, page, limit int, search string) ([]models.
 
 	// Search Filter
 	if search != "" {
-		searchPattern := "%" + search + "%"
+		searchPattern := "%" + strings.ToLower(search) + "%"
 		query = query.Where("LOWER(name) LIKE ?", searchPattern)
 	}
 
@@ -32,9 +33,16 @@ func GetTeamByOrganization(orgID int, page, limit int, search string) ([]models.
 
 	var teams []models.Team
 
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
 	offset := (page - 1) * limit
 
 	err := query.
+		Preload("Category").
 		Preload("Members").
 		Preload("Members.User").
 		Offset(offset).
@@ -51,6 +59,7 @@ func GetTeamsByOrganization(orgID int) ([]dtos.TeamMembersByOrganizationResponse
 	err := db.DB.
 		Model(&models.Team{}).
 		Where("organization_id = ?", orgID).
+		Preload("Category").
 		Preload("Members.User").
 		Find(&teams).Error
 
@@ -71,11 +80,25 @@ func GetTeamsByOrganization(orgID int) ([]dtos.TeamMembersByOrganizationResponse
 			})
 		}
 
+		var description string
+		if t.Description != nil {
+			description = *t.Description
+		}
+
+		categoryID := t.CategoryID
+		var categoryName *string
+		if t.Category != nil {
+			name := t.Category.Name
+			categoryName = &name
+		}
+
 		result = append(result, dtos.TeamMembersByOrganizationResponse{
-			ID:          t.ID,
-			Name:        t.Name,
-			Description: *t.Description,
-			Members:     members,
+			ID:           t.ID,
+			Name:         t.Name,
+			Description:  description,
+			Members:      members,
+			CategoryID:   categoryID,
+			CategoryName: categoryName,
 		})
 	}
 
@@ -83,48 +106,67 @@ func GetTeamsByOrganization(orgID int) ([]dtos.TeamMembersByOrganizationResponse
 }
 
 // Create Team
-func CreateTeam(orgID int, name, description string) (*models.Team, error) {
-
+func CreateTeam(orgID int, name, description string, categoryID *int) (*models.Team, error) {
 	var existing models.Team
 
 	err := db.DB.
 		Where("organization_id = ? AND name = ?", orgID, name).First(&existing).Error
 
 	if err == nil {
-		return nil, fmt.Errorf("ya existe un equipo con el nombre '%s' en esta organización", name)
+		return nil, fmt.Errorf("ya existe un equipo con el nombre '%s' en esta organizacion", name)
 	}
 
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
-	// Create team
-	desc := &description
+	var resolvedCategoryID *uint
+	if categoryID != nil {
+		var category models.Category
+		if err := db.DB.Where("id = ? AND organization_id = ?", *categoryID, orgID).First(&category).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errors.New("categoria no pertenece a la organizacion")
+			}
+			return nil, err
+		}
+		cid := category.ID
+		resolvedCategoryID = &cid
+	}
+
+	var descPtr *string
+	if description != "" {
+		descPtr = &description
+	}
+
 	team := models.Team{
 		Name:           name,
-		Description:    desc,
+		Description:    descPtr,
 		OrganizationID: uint(orgID),
+		CategoryID:     resolvedCategoryID,
 	}
 
 	if err := db.DB.Create(&team).Error; err != nil {
 		return nil, err
 	}
 
+	if err := db.DB.Preload("Category").First(&team, team.ID).Error; err != nil {
+		return nil, err
+	}
+
 	return &team, nil
 }
 
-// UpdateTeam actualiza campos del equipo (nombre, descripción) dentro de la misma organización
+// UpdateTeam actualiza campos del equipo (nombre, descripcion) dentro de la misma organizacion
 func UpdateTeam(orgID, teamID int, dto dtos.UpdateTeamDto) (*models.Team, error) {
 	var team models.Team
 
-	if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).First(&team).Error; err != nil {
+	if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).Preload("Category").First(&team).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("equipo no encontrado")
 		}
 		return nil, err
 	}
 
-	// Validar unicidad del nombre si se envía uno nuevo
 	if dto.Name != nil {
 		var exists models.Team
 		if err := db.DB.
@@ -132,22 +174,40 @@ func UpdateTeam(orgID, teamID int, dto dtos.UpdateTeamDto) (*models.Team, error)
 			First(&exists).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		} else if err == nil {
-			return nil, fmt.Errorf("ya existe un equipo con el nombre '%s' en esta organización", *dto.Name)
+			return nil, fmt.Errorf("ya existe un equipo con el nombre '%s' en esta organizacion", *dto.Name)
 		}
 		team.Name = *dto.Name
 	}
 
 	if dto.Description != nil {
-		// Permite setear a vacío si viene "" o a nil si se requiere omitir
 		desc := *dto.Description
 		team.Description = &desc
 		if desc == "" {
-			// Si prefieres que vacío signifique NULL, descomenta:
-			// team.Description = nil
+			team.Description = nil
+		}
+	}
+
+	if dto.CategoryID != nil {
+		if *dto.CategoryID == 0 {
+			team.CategoryID = nil
+		} else {
+			var category models.Category
+			if err := db.DB.Where("id = ? AND organization_id = ?", *dto.CategoryID, orgID).First(&category).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return nil, errors.New("categoria no pertenece a la organizacion")
+				}
+				return nil, err
+			}
+			cid := category.ID
+			team.CategoryID = &cid
 		}
 	}
 
 	if err := db.DB.Save(&team).Error; err != nil {
+		return nil, err
+	}
+
+	if err := db.DB.Preload("Category").First(&team, team.ID).Error; err != nil {
 		return nil, err
 	}
 
@@ -161,16 +221,16 @@ func AddMemberToTeam(teamID, userID, orgID int, role enums.UserRole) error {
 		return errors.New("rol inválido para equipo")
 	}
 
-	// Verificar que el equipo existe y pertenece a la organización
+	// Verificar que el equipo existe y pertenece a la organizacion
 	var team models.Team
 	if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).First(&team).Error; err != nil {
 		return errors.New("equipo no encontrado")
 	}
 
-	// Verificar que el usuario existe y pertenece a la misma organización
+	// Verificar que el usuario existe y pertenece a la misma organizacion
 	var user models.User
 	if err := db.DB.Where("id = ? AND organization_id = ?", userID, orgID).First(&user).Error; err != nil {
-		return errors.New("usuario no encontrado en la organización")
+		return errors.New("usuario no encontrado en la organizacion")
 	}
 
 	// Verificar que el usuario no esté ya en el equipo
@@ -197,16 +257,16 @@ func AddMemberToTeam(teamID, userID, orgID int, role enums.UserRole) error {
 
 // DeleteMemberToTeam
 func RemoveMemberFromTeam(teamID, userID, orgID int) error {
-	// Verificar que el equipo existe y pertenece a la organización
+	// Verificar que el equipo existe y pertenece a la organizacion
 	var team models.Team
 	if err := db.DB.Where("id = ? AND organization_id = ?", teamID, orgID).First(&team).Error; err != nil {
 		return errors.New("equipo no encontrado")
 	}
 
-	// Verificar que el usuario existe y pertenece a la organización
+	// Verificar que el usuario existe y pertenece a la organizacion
 	var user models.User
 	if err := db.DB.Where("id = ? AND organization_id = ?", userID, orgID).First(&user).Error; err != nil {
-		return errors.New("usuario no encontrado en la organización")
+		return errors.New("usuario no encontrado en la organizacion")
 	}
 
 	// Eliminar la membresía específica del equipo

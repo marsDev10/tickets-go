@@ -17,8 +17,9 @@ func main() {
 	db.DB.AutoMigrate(
 		&models.Organization{},
 		&models.User{},
-		&models.Ticket{},
+		&models.Category{},
 		&models.Team{},
+		&models.Ticket{},
 		&models.TeamMember{},
 	)
 
