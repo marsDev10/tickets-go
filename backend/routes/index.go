@@ -3,6 +3,8 @@ package routes
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -17,6 +19,12 @@ func InitRouter() *mux.Router {
 	router.StrictSlash(true)
 
 	router.Use(loggingMiddleware)
+	router.Use(middleware.CORSMiddleware(getAllowedOrigins()))
+
+	// Handle preflight requests for any route early so CORS headers are sent.
+	router.PathPrefix("/").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
 
 	authRouter := router.PathPrefix("/api/auth").Subrouter()
 	// Aquí puedes agregar las rutas de autenticación
@@ -145,4 +153,26 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		log.Printf("Completado en %v", time.Since(start))
 	})
+}
+
+func getAllowedOrigins() []string {
+	raw := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS"))
+	if raw == "" {
+		return []string{"*"}
+	}
+
+	parts := strings.Split(raw, ",")
+	origins := make([]string, 0, len(parts))
+
+	for _, part := range parts {
+		if origin := strings.TrimSpace(part); origin != "" {
+			origins = append(origins, origin)
+		}
+	}
+
+	if len(origins) == 0 {
+		return []string{"*"}
+	}
+
+	return origins
 }
