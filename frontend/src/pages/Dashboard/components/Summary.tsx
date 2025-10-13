@@ -1,3 +1,4 @@
+import Loader from "../../../components/Loaders/Loader";
 import { useDashboardContext } from "../context/DashboardProvider"
 
 const Summary = () => {
@@ -16,9 +17,7 @@ const Summary = () => {
 
     if (loadingSummary) {
         return (
-            <div className="flex h-32 items-center justify-center">
-                <div className="animate-spin rounded-full border-b-2 border-gray-900 h-10 w-10"></div>
-            </div>
+            <Loader/>
         )
     }
     
