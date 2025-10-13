@@ -11,6 +11,7 @@ import { AppLayout } from '../layouts/AppLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 
 const DashboardPage = lazy(() => import('../pages/Dashboard'))
+const Tickets = lazy(() => import('../pages/Tickets'))
 const LoginPage = lazy(() => import('../pages/Login'))
 const ForbiddenPage = lazy(() => import('../pages/Forbidden'))
 const NotFoundPage = lazy(() => import('../pages/NotFound'))
@@ -25,7 +26,7 @@ export const router = createBrowserRouter([
     element: <Outlet />,
     errorElement: <RouterErrorBoundary />,
     children: [
-      { index: true, element: <Navigate to="/app" replace /> },
+      { index: true, element: <Navigate to="/app/dashboard" replace /> },
       {
         element: (
           <RedirectIfAuthenticated pendingElement={<FullScreenSpinner />} />
@@ -52,8 +53,15 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                path: 'dashboard',
                 element: withSuspense(<DashboardPage />),
               },
+              {
+                index: true,
+                path: 'tickets',
+                element: withSuspense(<Tickets />),
+              },
+              
             ],
           },
         ],

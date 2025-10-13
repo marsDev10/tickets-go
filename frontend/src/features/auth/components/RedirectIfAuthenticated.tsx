@@ -10,7 +10,7 @@ export interface RedirectIfAuthenticatedProps {
 }
 
 export const RedirectIfAuthenticated = ({
-  redirectTo = '/app',
+  redirectTo = '/app/dashboard',
   pendingElement = null,
   children,
 }: RedirectIfAuthenticatedProps) => {

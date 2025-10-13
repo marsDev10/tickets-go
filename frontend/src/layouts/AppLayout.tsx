@@ -40,11 +40,11 @@ const AuthenticatedShell = () => {
   }
 
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
-    { label: 'Tickets', path: '/tickets', icon: <Inbox size={20} /> },
-    { label: 'Users', path: '/users', icon: <Users size={20} /> },
-    { label: 'Teams', path: '/teams', icon: <Users size={20} /> },
-    { label: 'Settings', path: '/settings', icon: <Settings size={20} /> },
+    { label: 'Dashboard', path: '/app/dashboard', icon: <LayoutDashboard size={20} /> },
+    { label: 'Tickets', path: '/app/tickets', icon: <Inbox size={20} /> },
+    { label: 'Users', path: '/app/users', icon: <Users size={20} /> },
+    { label: 'Teams', path: '/app/teams', icon: <Users size={20} /> },
+    { label: 'Settings', path: '/app/settings', icon: <Settings size={20} /> },
   ]
 
   return (
@@ -93,6 +93,14 @@ const AuthenticatedShell = () => {
               <span className="flex items-center gap-2">
                 <Plus size={18} />
                 New Ticket
+              </span>
+            </button>
+            <button
+            onClick={handleLogout}
+            disabled={isLoggingOut} 
+            className="cursor-pointer rounded-lg bg-sky-500 px-3 py-1.5 text-sm font-medium text-white shadow transition hover:bg-sky-400">
+              <span className="flex items-center gap-2">
+                Cerrar Sesión
               </span>
             </button>
             <button className="relative">
