@@ -71,6 +71,14 @@ func InitRouter() *mux.Router {
 		),
 	).Methods("POST")
 
+	dashboardRouter := protectedRouter.PathPrefix("/dashboard").Subrouter()
+
+	dashboardRouter.Handle("/summary",
+		middleware.RoleMiddleware("admin", "manager", "agent", "member", "viewer")(
+			http.HandlerFunc(GetDashboardSummaryHandler),
+		),
+	).Methods("GET")
+
 	// Tickets router
 	ticketsRouter := protectedRouter.PathPrefix("/tickets").Subrouter()
 
