@@ -9,8 +9,6 @@ export interface IUseUsers {
     }
 }
 
-
-
 export const useUsers = (): IUseUsers => {
 
     const {

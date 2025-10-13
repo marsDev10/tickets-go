@@ -1,9 +1,15 @@
-import { createContext, useContext, type ReactNode } from "react"
+import { createContext, useContext, useState, type ReactNode } from "react"
 import { useUsers, type IUseUsers } from "../hooks/useUsers"
 
 
 
 interface UsersContextValue {
+    state: {
+      showCreateUser: boolean;
+    },
+    setters: {
+      setShowCreateUser: (show: boolean) => void;
+    };
     users: IUseUsers;
 }
 
@@ -15,9 +21,17 @@ interface UsersProviderProps {
 
 export const UsersProvider = ({ children }: UsersProviderProps) => {
 
+  const [showCreateUser, setShowCreateUser] = useState(false);
+
   const users = useUsers();
 
   const value: UsersContextValue = {
+    state: {
+      showCreateUser,
+    },
+    setters: {
+      setShowCreateUser,
+    },
     users,
   }
 

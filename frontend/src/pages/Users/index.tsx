@@ -4,29 +4,8 @@ import { MoreVertical } from 'lucide-react'
 import Header from './components/Header'
 
 // Interfaces
-import type { IUserPartial } from './interfaces/User'
 import { useUsersContext } from './context/UsersProvider'
 import Loader from '../../components/Loaders/Loader'
-
-const users: IUserPartial[] = [
-  {
-    ID: 1,
-    first_name: 'Carlos Mendoza',
-    email: 'carlos@helpdesk.com',
-    role: 'Admin',
-    is_active: true,
-    UpdatedAt: new Date(),
-
-  },
-  {
-    ID: 2,
-    first_name: 'Ana Garcia',
-    email: 'ana@helpdesk.com',
-    role: 'Agent',
-    is_active: true,
-    UpdatedAt: new Date(),
-  }
-]
 
 const Users = () => {
 
