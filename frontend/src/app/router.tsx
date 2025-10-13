@@ -10,6 +10,7 @@ import { RouterErrorBoundary } from '../components/feedback/RouterErrorBoundary'
 import { AppLayout } from '../layouts/AppLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 import { DashboardProvider } from '../pages/Dashboard/context/DashboardProvider'
+import Users from '../pages/Users'
 
 const DashboardPage = lazy(() => import('../pages/Dashboard'))
 const Tickets = lazy(() => import('../pages/Tickets'))
@@ -58,11 +59,13 @@ export const router = createBrowserRouter([
                 element: withSuspense(<DashboardProvider><DashboardPage /></DashboardProvider>),
               },
               {
-                index: true,
                 path: 'tickets',
                 element: withSuspense(<Tickets />),
               },
-              
+              {
+                path: 'users',
+                element: withSuspense(<Users/>),
+              },
             ],
           },
         ],
