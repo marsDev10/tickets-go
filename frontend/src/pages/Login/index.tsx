@@ -6,6 +6,7 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import { useAuth, useLoginMutation } from '../../features/auth'
 import { useDispatch } from 'react-redux'
 import { setCredentials } from '../../features/auth/slice'
+import { Eye, EyeClosed } from 'lucide-react'
 
 const getErrorMessage = (
   apiError: FetchBaseQueryError | SerializedError | undefined,
@@ -44,8 +45,13 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const redirectTo = (location.state as { from?: string } | null)?.from ?? '/app'
 
+  const tocglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  }
+  
   useEffect(() => {
     if (isAuthenticated) {
       navigate(redirectTo, { replace: true })
@@ -92,16 +98,34 @@ const Login = () => {
         <label htmlFor="password" className="block text-sm font-medium text-slate-200">
           Contraseña
         </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40"
-          placeholder="••••••"
-        />
+        <section
+        className="flex justify-between w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/40"
+        >
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
+            required
+            className='w-full bg-slate-950 focus:outline-none'
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="••••••"
+          />
+          <button
+          type="button"
+          onClick={tocglePasswordVisibility}
+          className="flex items-center justify-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
+          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          >
+            {
+              showPassword ? (
+                <EyeClosed/>
+              ) : (
+                <Eye />
+              )
+            }
+          </button>
+        </section>
       </fieldset>
 
       <label className="flex items-center gap-2 text-sm text-slate-300">

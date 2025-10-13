@@ -9,6 +9,7 @@ import { FullScreenSpinner } from '../components/feedback/FullScreenSpinner'
 import { RouterErrorBoundary } from '../components/feedback/RouterErrorBoundary'
 import { AppLayout } from '../layouts/AppLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
+import { DashboardProvider } from '../pages/Dashboard/context/DashboardProvider'
 
 const DashboardPage = lazy(() => import('../pages/Dashboard'))
 const Tickets = lazy(() => import('../pages/Tickets'))
@@ -54,7 +55,7 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 path: 'dashboard',
-                element: withSuspense(<DashboardPage />),
+                element: withSuspense(<DashboardProvider><DashboardPage /></DashboardProvider>),
               },
               {
                 index: true,

@@ -1,4 +1,4 @@
-import { Link } from 'react-router/dom'
+import { Link } from 'react-router'
 
 const Forbidden = () => (
   <div className="space-y-4 text-center text-slate-200">

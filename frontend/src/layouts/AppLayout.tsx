@@ -61,7 +61,7 @@ const AuthenticatedShell = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition hover:bg-slate-800 hover:text-white"
+              className="cursor-pointer flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 transition hover:bg-slate-800 hover:text-white"
             >
               {item.icon}
               {item.label}
@@ -73,7 +73,7 @@ const AuthenticatedShell = () => {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 backdrop-blur">
+        <header className="flex h-16 items-center justify-between border-b border-slate-800 px-4 backdrop-blur">
           <div className="flex items-center gap-4">
             <button className="lg:hidden">
               <Menu size={24} />
@@ -118,7 +118,7 @@ const AuthenticatedShell = () => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto bg-slate-900 p-6">
+        <main className="flex-1 overflow-auto p-6 container mx-auto">
           <Outlet />
         </main>
       </div>
