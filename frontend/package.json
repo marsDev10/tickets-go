@@ -14,8 +14,10 @@
     "lucide-react": "^0.545.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-form-hook": "^0.0.1",
     "react-redux": "^9.2.0",
-    "react-router": "^7.9.4"
+    "react-router": "^7.9.4",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

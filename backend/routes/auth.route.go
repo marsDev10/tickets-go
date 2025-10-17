@@ -21,7 +21,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSONResponse(w, http.StatusOK, utils.SuccessResponse("Login exitoso", data))
+	utils.JSONResponse(w, http.StatusOK, utils.SuccessResponse("Hola, ¡Bienvenido! 😁👌", data))
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {

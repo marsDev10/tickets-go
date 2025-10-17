@@ -62,7 +62,9 @@ const Login = () => {
     event.preventDefault()
 
     try {
-      const response = await login({ email, password, remember }).unwrap()
+      const response = await login({ email, password, remember }).unwrap();
+
+      console.log()
 
       if(response.success) {
         dispatch(setCredentials({ user: response.data.user, token: response.data.token }));
