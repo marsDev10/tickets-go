@@ -75,20 +75,6 @@ export const requestStatusMiddleware: Middleware = () => (next) => (action) => {
       switch (errorPayload.status) {
         case 401:
         
-          if(action.type.includes('/rejected')) {
-
-            toast.error('Credenciales inválidas', {
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: false,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "colored",
-            }); 
-            break;
-          }
-          
           toast.error('Sesion expirada, redirigiendo al login...', {
             autoClose: 5000,
             hideProgressBar: false,
@@ -100,8 +86,19 @@ export const requestStatusMiddleware: Middleware = () => (next) => (action) => {
           });
           
           store.dispatch(logout());
-          //window.location.href = '/login'
+          window.location.href = '/login'
           break
+        case 403: 
+          toast.error('Credenciales inválidas', {
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            }); 
+            break;
         case 500:
          toast.error('!Ops, ocurrió un error interno', {
             autoClose: 5000,

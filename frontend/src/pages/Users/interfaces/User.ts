@@ -5,7 +5,7 @@ export interface IUser {
     DeletedAt:       null;
     first_name:      string;
     last_name:       string;
-    gender:          number;
+    gender:          string;
     email:           string;
     phone:           string;
     password:        string;
@@ -15,4 +15,7 @@ export interface IUser {
     organization_id: number;
 }
 
-export type IUserPartial = Partial<IUser>;
+
+export type TUserPartial = Partial<IUser>;
+
+export type TCreateUser = Pick<IUser, 'first_name' | 'last_name' | 'gender' | 'email' | 'password' | 'phone' | 'role'>;

@@ -2,6 +2,7 @@ import { MoreVertical } from 'lucide-react'
 
 // Components
 import Header from './components/Header'
+import Modals from './components/Modals'
 
 // Interfaces
 import { useUsersContext } from './context/UsersProvider'
@@ -81,6 +82,7 @@ const Users = () => {
           </tbody>
         </table>
       </div>
+      <Modals/>
     </div>
   )
 }

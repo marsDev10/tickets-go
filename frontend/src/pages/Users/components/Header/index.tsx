@@ -1,6 +1,14 @@
 import { Plus, Search } from "lucide-react"
+import { useUsersContext } from "../../context/UsersProvider"
 
 const Header = () => {
+
+  const {
+        setters: {
+          setShowCreateUser,
+        }
+      } = useUsersContext()
+
   return (
     <>
         <div className="flex items-center justify-between">
@@ -10,7 +18,9 @@ const Header = () => {
             Manage your team members and their roles
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500">
+        <button 
+        onClick={() => setShowCreateUser(true)}
+        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500">
           <Plus size={20} />
           Add User
         </button>

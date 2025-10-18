@@ -16,14 +16,14 @@ func Login(dto *dtos.LoginDto) (map[string]interface{}, error) {
 	var user models.User
 	if err := db.DB.Where("email = ?", dto.Email).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, errors.New("Credenciales Incorrectas")
+			return nil, errors.New("credenciales incorrectas")
 		}
 		return nil, err
 	}
 
 	// Comparar contraseñas
 	if !utils.CheckPassword(dto.Password, user.Password) {
-		return nil, errors.New("Credenciales Incorrectas")
+		return nil, errors.New("credenciales incorrectas")
 	}
 
 	// Generar JWT

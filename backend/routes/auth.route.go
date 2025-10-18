@@ -17,7 +17,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	data, err := controllers.Login(&dto)
 	if err != nil {
-		utils.JSONResponse(w, http.StatusUnauthorized, utils.ErrorResponse("Credenciales incorrectas", err.Error()))
+		utils.JSONResponse(w, http.StatusForbidden, utils.ErrorResponse("Credenciales incorrectas", err.Error()))
 		return
 	}
 

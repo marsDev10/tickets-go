@@ -19,7 +19,7 @@ func InitRouter() *mux.Router {
 	router.StrictSlash(true)
 
 	router.Use(loggingMiddleware)
-	router.Use(middleware.CORSMiddleware(getAllowedOrigins()))
+	router.Use(middleware.CORSMiddleware(getAllowedOrigins([]string{"http://localhost:5173"})))
 
 	// Handle preflight requests for any route early so CORS headers are sent.
 	router.PathPrefix("/").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
