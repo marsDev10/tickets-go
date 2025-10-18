@@ -2,7 +2,7 @@ import { apiSlice } from '../../../api/apiSlice'
 import type { ApiTagType } from '../../../api/apiSlice'
 import type { ApiResponse } from '../../../interfaces/Response'
 import type { IGetUserResponse } from '../interfaces/Reponse'
-import type { IUser, TCreateUser } from '../interfaces/User'
+import type { IUser, TCreateUser, TUpdateUser } from '../interfaces/User'
 
 export const api = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -21,10 +21,19 @@ export const api = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['Users' as ApiTagType],
     }),
+    updateUser: builder.mutation<ApiResponse<IUser>, TUpdateUser>({
+      query: (body) => ({
+        url: '/users/',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['Users' as ApiTagType],
+    }),
   }),
 })
 
 export const {
   useGetUsersByOrganizationQuery,
   useCreateUserMutation,
+  useUpdateUserMutation,
 } = api

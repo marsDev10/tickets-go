@@ -1,7 +1,7 @@
-import type { IUserPartial } from "./User";
+import type { TUserPartial } from "./User";
 
 export interface IGetUserResponse {
-    data: IUserPartial[];
+    data: TUserPartial[];
     pagination: {
         limit: number;
         page: number;

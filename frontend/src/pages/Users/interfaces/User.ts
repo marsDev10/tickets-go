@@ -19,3 +19,5 @@ export interface IUser {
 export type TUserPartial = Partial<IUser>;
 
 export type TCreateUser = Pick<IUser, 'first_name' | 'last_name' | 'gender' | 'email' | 'password' | 'phone' | 'role'>;
+
+export type TUpdateUser = Partial<TCreateUser> & { id: number };
