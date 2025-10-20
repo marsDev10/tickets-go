@@ -40,6 +40,8 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 		return nil, 0, err
 	}
 
+	//TODO: Return gender as string in response 1 = male, 2 = female, 3 = other
+
 	// Obtener usuarios con paginación
 	var users []models.User
 	offset := (page - 1) * limit

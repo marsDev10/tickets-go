@@ -4,10 +4,10 @@ import { useUsersContext } from "../../context/UsersProvider"
 const Header = () => {
 
   const {
-        setters: {
-          setShowCreateUser,
-        }
-      } = useUsersContext()
+    handles: {
+      handleUserShowModal,
+    }
+  } = useUsersContext()
 
   return (
     <>
@@ -19,7 +19,7 @@ const Header = () => {
           </p>
         </div>
         <button 
-        onClick={() => setShowCreateUser(true)}
+        onClick={() => handleUserShowModal(null)}
         className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500">
           <Plus size={20} />
           Add User

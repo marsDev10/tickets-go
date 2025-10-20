@@ -29,25 +29,25 @@ const isSerializedError = (error: unknown): error is SerializedError => {
  */
 export const requestStatusMiddleware: Middleware = () => (next) => (action) => {
 
-  console.log("Action", action);
+  //console.log("Action", action);
 
   if (isPending(action) && action.meta?.arg && typeof action.meta.arg === 'object' && action.meta.arg !== null && 'type' in action.meta.arg && 'endpointName' in action.meta.arg) {
-    console.info(
+    /* console.info(
       `Pending ${(action.meta.arg as any).type} for "${(action.meta.arg as any).endpointName}"`,
-    )
+    ) */
   }
 
   if (isFulfilled(action) && action.meta?.arg && typeof action.meta.arg === 'object' && action.meta.arg !== null && 'type' in action.meta.arg && 'endpointName' in action.meta.arg) {
-    console.info(
+    /* console.info(
       `Success ${(action.meta.arg as any).type} for "${(action.meta.arg as any).endpointName}"`,
-    )
+    ) */
 
     //console.log("Meta Success", action.meta);
 
     const method = (action.meta as any)?.baseQueryMeta?.request?.method as string | undefined;
     const message = (action.payload as any)?.message as string | undefined;
 
-    console.log("Message", message);
+    //console.log("Message", message);
 
   if (method && typeof method === 'string') {
       //console.log("Method Success", method);

@@ -1,4 +1,4 @@
-import { MoreVertical } from 'lucide-react'
+import { MoreVertical, UserPen } from 'lucide-react'
 
 // Components
 import Header from './components/Header'
@@ -11,9 +11,14 @@ import Loader from '../../components/Loaders/Loader'
 const Users = () => {
 
   const {
-    state: { data: users },
-    loadings: { loadingGetUsers },
-  } = useUsersContext().users;
+    users: {
+      state: { users },
+      loadings: { loadingGetUsers },
+    },
+    handles: {
+      handleUserShowModal,
+    }
+  } = useUsersContext();
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase()
@@ -41,7 +46,7 @@ const Users = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700">
-            {users.map((user) => (
+            {users.data.map((user) => (
               <tr key={user.ID} className="group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -72,8 +77,13 @@ const Users = () => {
                 <td className="px-6 py-4 text-slate-400">
                   {user.UpdatedAt ? new Date(user.UpdatedAt).toLocaleDateString() : 'N/A'}
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="invisible rounded p-1 hover:bg-slate-700 group-hover:visible">
+                <td className="px-6 py-4 text-right flex gap-2 justify-center items-center">
+                  <button 
+                  onClick={() => handleUserShowModal(user)}
+                  className="cursor-pointer invisible rounded p-1 hover:bg-slate-700 group-hover:visible">
+                    <UserPen className="h-5 w-5 text-slate-400" />
+                  </button>
+                  <button className="cursor-pointer invisible rounded p-1 hover:bg-slate-700 group-hover:visible">
                     <MoreVertical className="h-5 w-5 text-slate-400" />
                   </button>
                 </td>

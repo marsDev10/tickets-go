@@ -3,21 +3,27 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 //Types
-import { type TCreateUser } from '../../interfaces/User';
+import { type TCreateUser, type TUpdateUser } from '../../interfaces/User';
 import { useUsersContext } from '../../context/UsersProvider';
 
 const CreateUser = () => {
 
   const {
+    state: {
+      currentUser,
+    },
     setters: {
       setShowCreateUser
     },
     users: {
       handles: {
-        handleCreateUser
+        handleCreateUser,
+        handleUpdateUser,
       }
     }
   } = useUsersContext();
+
+  const isEditing = Boolean(currentUser);
 
   const schema = yup
   .object()
@@ -26,17 +32,53 @@ const CreateUser = () => {
     last_name: yup.string().required('Apellido es requerido'),
     gender: yup.string().required('Género es requerido'),
     email: yup.string().email('Email inválido').required('Email es requerido'),
-    password: yup.string().min(8, 'Mínimo 8 caracteres').required('Contraseña es requerida'),
+    password: isEditing ? yup.string() : yup.string().min(8, 'La contraseña debe tener al menos 8 caracteres').required('Contraseña es requerida'),
     phone: yup.string().required('Teléfono es requerido'),
     role: yup.string().required('Rol es requerido'),
   })
   .required();
 
   const { register, handleSubmit, formState: { errors } } = useForm<TCreateUser>({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema) as any,
+    defaultValues: currentUser ? {
+      first_name: currentUser.first_name || '',
+      last_name: currentUser.last_name || '',
+      email: currentUser.email || '',
+      phone: currentUser.phone || '',
+      gender: currentUser.gender || '',
+      role: currentUser.role || '',
+    } : {
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      gender: '',
+      role: '',
+      password: '',
+    }
   });
 
   const onSubmit = async (data: TCreateUser) => {
+
+    if(isEditing && currentUser) {
+
+      const updateData: TUpdateUser = {
+        id: currentUser.ID!, // Usar ID de la interfaz IUser
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        phone: data.phone,
+        gender: data.gender,
+        role: data.role,
+      };
+
+      const [error] = await handleUpdateUser(updateData);
+      if (error) {
+        console.error("Error updating user:", error);
+        return;
+      }
+      return;
+    }
 
     const [error] = await handleCreateUser(data);
 
@@ -45,6 +87,8 @@ const CreateUser = () => {
       return;
     } 
   }
+
+  console.log("Current User in CreateUser:", currentUser);
   
   return (
     <div className="max-w-2xl mx-auto p-6 bg-primary text-white rounded-lg">
@@ -176,7 +220,9 @@ const CreateUser = () => {
         </div>
 
         {/* Contraseña */}
-        <div>
+        {
+          !isEditing && (
+            <div>
           <label htmlFor="password" className="block text-sm font-medium  mb-1">
             Contraseña *
           </label>
@@ -194,6 +240,9 @@ const CreateUser = () => {
           )}
         </div>
 
+          )
+        }
+        
         {/* Botones */}
         <div className="flex gap-4 pt-4">
           <button
