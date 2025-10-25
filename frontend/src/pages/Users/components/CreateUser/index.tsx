@@ -3,7 +3,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 //Types
-import { type TCreateUser, type TUpdateUser } from '../../interfaces/User';
+import type { TCreateUser, TUpdateUser } from '../../interfaces/User';
 import { useUsersContext } from '../../context/UsersProvider';
 
 const CreateUser = () => {
@@ -59,33 +59,39 @@ const CreateUser = () => {
   });
 
   const onSubmit = async (data: TCreateUser) => {
+    try {
 
-    if(isEditing && currentUser) {
+      if(isEditing && currentUser) {
 
-      const updateData: TUpdateUser = {
-        id: currentUser.ID!, // Usar ID de la interfaz IUser
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        phone: data.phone,
-        gender: data.gender,
-        role: data.role,
-      };
+        const updateData: TUpdateUser = {
+          id: currentUser.ID!, // Usar ID de la interfaz IUser
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          phone: data.phone,
+          gender: data.gender,
+          role: data.role,
+        };
 
-      const [error] = await handleUpdateUser(updateData);
-      if (error) {
-        console.error("Error updating user:", error);
+        const [error] = await handleUpdateUser(updateData);
+        if (error) {
+          console.error("Error updating user:", error);
+          return;
+        }
         return;
       }
-      return;
-    }
 
     const [error] = await handleCreateUser(data);
 
-    if (error) {
-      console.error("Error creating user:", error);
+      if (error) {
+        console.error("Error creating user:", error);
       return;
-    } 
+      } 
+    } catch (error) {
+      console.error("Error creating/updating user:", error);
+    } finally {
+      setShowCreateUser(false);  
+    }
   }
 
   console.log("Current User in CreateUser:", currentUser);

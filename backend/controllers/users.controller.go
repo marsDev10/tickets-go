@@ -14,7 +14,7 @@ import (
 )
 
 // Función auxiliar para obtener usuarios por organización (sin HTTP)
-func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]models.User, int64, error) {
+func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]map[string]interface{}, int64, error) {
 	// Construir la query base
 	query := db.DB.Where("organization_id = ?", strconv.Itoa(orgID))
 
@@ -40,10 +40,8 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 		return nil, 0, err
 	}
 
-	//TODO: Return gender as string in response 1 = male, 2 = female, 3 = other
-
 	// Obtener usuarios con paginación
-	var users []models.User
+	var dbUsers []models.User
 	offset := (page - 1) * limit
 
 	err := query.
@@ -53,8 +51,46 @@ func GetUsersByOrganization(orgID int, page, limit int, search, role string) ([]
 		Offset(offset).
 		Limit(limit).
 		Order("created_at DESC").
-		Find(&users).Error
-	return users, total, err
+		Find(&dbUsers).Error
+	if err != nil {
+		return nil, total, err
+	}
+
+	users := make([]map[string]interface{}, len(dbUsers))
+	for i, user := range dbUsers {
+		gender := ""
+		switch user.Gender {
+		case 1:
+			gender = "male"
+		case 2:
+			gender = "female"
+		case 3:
+			gender = "other"
+		}
+
+		users[i] = map[string]interface{}{
+			"ID":                user.ID,
+			"CreatedAt":         user.CreatedAt,
+			"UpdatedAt":         user.UpdatedAt,
+			"DeletedAt":         user.DeletedAt,
+			"first_name":        user.FirstName,
+			"last_name":         user.LastName,
+			"gender":            gender,
+			"email":             user.Email,
+			"phone":             user.Phone,
+			"password":          user.Password,
+			"role":              user.Role,
+			"is_active":         user.IsActive,
+			"global_role":       string(user.GlobalRole),
+			"organization_id":   user.OrganizationID,
+			"team_memberships":  user.TeamMemberships,
+			"assigned_tickets":  user.AssignedTickets,
+			"requested_tickets": user.RequestedTickets,
+			"created_tickets":   user.CreatedTickets,
+		}
+	}
+
+	return users, total, nil
 }
 
 func GetUserByOrganization(orgID int, userID int) (*dtos.UserResponse, error) {
