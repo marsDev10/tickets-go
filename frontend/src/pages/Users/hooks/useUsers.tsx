@@ -1,12 +1,17 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { useCreateUserMutation, useGetUsersByOrganizationQuery, useUpdateUserMutation } from "../services/api";
 import { type IGetUserResponse } from "../interfaces/Reponse";
-import type { TCreateUser, TUpdateUser } from "../interfaces/User";
+import type { TCreateUser, TUpdateUser, TUserPartial } from "../interfaces/User";
 
 export interface IUseUsers {
     state: {
+        search: string;
         users: IGetUserResponse;
+        filteredUsers: TUserPartial[];
     };
+    setters: {
+        setSearch: (search: string) => void;
+    },
     loadings: {
         loadingGetUsers: boolean;
         loadingCreateUser: boolean;
@@ -15,10 +20,13 @@ export interface IUseUsers {
     handles: {
         handleCreateUser: (data: TCreateUser) => Promise<[unknown | null, any]>;
         handleUpdateUser: (data: TUpdateUser) => Promise<[unknown | null, any]>;
+        handlerSearchUser: (e: ChangeEvent<HTMLInputElement>) => void;
     };
 }
 
 export const useUsers = (): IUseUsers => {
+
+    const [search, setSearch] = useState("");
 
     const {
         data: { data } = { data: [] },
@@ -69,9 +77,32 @@ export const useUsers = (): IUseUsers => {
         }
     }
 
+    const handlerSearchUser = (e:  ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+    }
+
+    const filteredUsers = useMemo(() => {
+        if (!search) return users.data;
+
+        const lowercasedSearch = search.toLowerCase();
+        const filteredData = users.data.filter(user => 
+            `${user.first_name} ${user.last_name}`.toLowerCase().includes(lowercasedSearch) ||
+            user?.email?.toLowerCase().includes(lowercasedSearch)
+        );
+
+        return filteredData;
+    }, [search, users]);
+
+    console.log("Filtered Users:", filteredUsers);
+
   return {
     state: {
+        search,
         users,
+        filteredUsers,
+    },
+    setters: {
+        setSearch,
     },
     loadings: {
         loadingGetUsers,
@@ -81,6 +112,7 @@ export const useUsers = (): IUseUsers => {
     handles: {
         handleCreateUser,
         handleUpdateUser,
+        handlerSearchUser
     }
   }
 }

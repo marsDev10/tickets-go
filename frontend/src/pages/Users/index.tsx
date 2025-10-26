@@ -12,7 +12,7 @@ const Users = () => {
 
   const {
     users: {
-      state: { users },
+      state: { users, filteredUsers },
       loadings: { loadingGetUsers },
     },
     handles: {
@@ -46,7 +46,14 @@ const Users = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700">
-            {users.data.map((user) => (
+            {filteredUsers.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-6 py-4 text-center text-sm text-slate-400">
+                  No users found.
+                </td>
+              </tr>
+            )}
+            {filteredUsers.map((user) => (
               <tr key={user.ID} className="group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
