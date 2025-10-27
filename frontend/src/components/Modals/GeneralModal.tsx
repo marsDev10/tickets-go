@@ -52,7 +52,7 @@ const GeneralModal = ({
           )}
           <button
             onClick={onClose}
-            className="ml-auto rounded-full p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+            className="cursor-pointer ml-auto rounded-full p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
           >
             <X size={20} />
           </button>

@@ -11,7 +11,7 @@ export interface ITeam {
     id: number;
     name: string;
     description: string;
-    members: IMember[];
+    members: IMember[] | null;
 }
 
 export interface IApiResponseTeamMember {
@@ -20,4 +20,23 @@ export interface IApiResponseTeamMember {
     success: boolean;
 }
 
+
+
 export type TMemberPartial = Omit<IMember, 'id'>;
+
+
+export type THandleTeam = Partial<ITeam>;
+
+export interface IApiResponseCreateTeam {
+    data: {
+        id: number;
+        name: string;
+        created_at: string;
+        updated_at: string;
+        organization_id: number;
+    };
+    message: string;
+    success: boolean;   
+}
+
+

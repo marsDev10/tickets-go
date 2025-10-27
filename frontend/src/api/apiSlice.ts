@@ -3,7 +3,7 @@ import type { RootState } from '../app/store'
 
 const baseUrl = 'http://localhost:8080/api'
 
-export const tagTypes = ['Ticket', 'TicketList', 'User'] as const;
+export const tagTypes = ['Dashboard', 'Ticket', 'User', 'Team', 'Settings', 'Auth'] as const;
 
 export const apiSlice = createApi({
   reducerPath: 'api',

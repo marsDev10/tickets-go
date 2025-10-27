@@ -1,5 +1,4 @@
 import { apiSlice } from '../../../api/apiSlice'
-import type { ApiTagType } from '../../../api/apiSlice'
 import type { ApiResponse } from '../../../interfaces/Response'
 import type { IGetUserResponse } from '../interfaces/Reponse'
 import type { IUser, TCreateUser, TUpdateUser } from '../interfaces/User'
@@ -11,7 +10,7 @@ export const api = apiSlice.injectEndpoints({
         url: '/users/organization/',
         method: 'GET',
       }),
-      providesTags: ['Users' as ApiTagType],
+      providesTags: ['User'],
     }),
     createUser: builder.mutation<ApiResponse<IUser>, TCreateUser>({
       query: (body) => ({
@@ -19,7 +18,7 @@ export const api = apiSlice.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Users' as ApiTagType],
+      invalidatesTags: ['User'],
     }),
     updateUser: builder.mutation<ApiResponse<IUser>, TUpdateUser>({
       query: (body) => ({
@@ -27,7 +26,7 @@ export const api = apiSlice.injectEndpoints({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['Users' as ApiTagType],
+      invalidatesTags: ['User'],
     }),
   }),
 })

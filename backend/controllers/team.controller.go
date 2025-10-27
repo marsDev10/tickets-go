@@ -229,7 +229,8 @@ func AddMemberToTeam(teamID, userID, orgID int, role enums.UserRole) error {
 
 	// Verificar que el usuario existe y pertenece a la misma organizacion
 	var user models.User
-	if err := db.DB.Where("id = ? AND organization_id = ?", userID, orgID).First(&user).Error; err != nil {
+	if err := db.DB.Where("id = ? AND organization_id = ?", userID, orgID).
+		Preload("TeamMemberships").First(&user).Error; err != nil {
 		return errors.New("usuario no encontrado en la organizacion")
 	}
 
@@ -252,7 +253,12 @@ func AddMemberToTeam(teamID, userID, orgID int, role enums.UserRole) error {
 		Role:   role,
 	}
 
-	return db.DB.Create(&member).Error
+	// Crear el registro en la base de datos
+	if err := db.DB.Create(&member).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteMemberToTeam

@@ -1,8 +1,15 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { useTeams } from "../hooks/useTeams";
 
 interface ITeamsContext {
-    teams: ReturnType<typeof useTeams>;
+  state: {
+    showCreateTeam: boolean;
+  },
+  setters: {
+    setShowCreateTeam: (value: boolean) => void;
+  }, 
+  teams: ReturnType<typeof useTeams>;
+
 }
 
 export const TeamsContext = createContext<ITeamsContext | null>(null);
@@ -13,10 +20,20 @@ interface Props {
 
 const TeamsProvider = ({ children }: Props) => {
 
+    const [showCreateTeam, setShowCreateTeam] = useState(false);
+
     const teams = useTeams();
 
   return (
-    <TeamsContext.Provider value={{ teams }}>
+    <TeamsContext.Provider value={{ 
+      state: {
+         showCreateTeam
+      }, 
+      setters: {
+        setShowCreateTeam
+      },
+      teams,
+    }}>
       {children}
     </TeamsContext.Provider>
   )
