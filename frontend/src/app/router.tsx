@@ -12,6 +12,7 @@ import { PublicLayout } from '../layouts/PublicLayout'
 import { DashboardProvider } from '../pages/Dashboard/context/DashboardProvider'
 import Users from '../pages/Users'
 import UsersProvider from '../pages/Users/context/UsersProvider'
+import Teams from '../pages/Teams'
 
 const DashboardPage = lazy(() => import('../pages/Dashboard'))
 const Tickets = lazy(() => import('../pages/Tickets'))
@@ -67,6 +68,10 @@ export const router = createBrowserRouter([
                 path: 'users',
                 element: withSuspense(<UsersProvider><Users/></UsersProvider>),
               },
+              {
+                path: 'teams',
+                element: withSuspense(<Teams />),
+              }
             ],
           },
         ],

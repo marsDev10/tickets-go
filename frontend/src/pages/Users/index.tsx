@@ -12,7 +12,7 @@ const Users = () => {
 
   const {
     users: {
-      state: { users, filteredUsers },
+      state: { filteredUsers },
       loadings: { loadingGetUsers },
     },
     handles: {
