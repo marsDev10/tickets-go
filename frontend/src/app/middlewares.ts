@@ -71,8 +71,21 @@ export const requestStatusMiddleware: Middleware = () => (next) => (action) => {
   if (isRejectedWithValue(action)) {
     const errorPayload = action.payload
 
+    console.log({ errorPayload });
+
     if (isFetchBaseQueryError(errorPayload) && typeof errorPayload.status === 'number') {
       switch (errorPayload.status) {
+        case 400:
+            toast.error((errorPayload.data as any)?.message || 'Error al realizar la acción', {
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            }); 
+            break;
         case 401:
         
           toast.error('Sesion expirada, redirigiendo al login...', {
