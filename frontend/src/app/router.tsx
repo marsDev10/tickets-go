@@ -10,11 +10,14 @@ import { RouterErrorBoundary } from '../components/feedback/RouterErrorBoundary'
 import { AppLayout } from '../layouts/AppLayout'
 import { PublicLayout } from '../layouts/PublicLayout'
 import { DashboardProvider } from '../pages/Dashboard/context/DashboardProvider'
-import Users from '../pages/Users'
+
+// Context Providers
 import UsersProvider from '../pages/Users/context/UsersProvider'
-import Teams from '../pages/Teams'
+import TeamsProvider from '../pages/Teams/context/TeamsProvider'
 
 const DashboardPage = lazy(() => import('../pages/Dashboard'))
+const Users = lazy(() => import('../pages/Users'))
+const Teams = lazy(() => import('../pages/Teams'))
 const Tickets = lazy(() => import('../pages/Tickets'))
 const LoginPage = lazy(() => import('../pages/Login'))
 const ForbiddenPage = lazy(() => import('../pages/Forbidden'))
@@ -70,7 +73,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: 'teams',
-                element: withSuspense(<Teams />),
+                element: withSuspense(<TeamsProvider><Teams /></TeamsProvider>),
               }
             ],
           },

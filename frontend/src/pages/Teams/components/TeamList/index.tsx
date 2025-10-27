@@ -1,4 +1,6 @@
+import Loader from "../../../../components/Loaders/Loader";
 import { getInitials } from "../../../../utils";
+import { useTeamContext } from "../../context/TeamsProvider";
 
 const teams = [
         {
@@ -46,9 +48,25 @@ const teams = [
     ];
 
 const TeamList = () => {
+
+    const {
+        teams: {
+            state: {
+                teams,
+            },
+            loadings: {
+                isLoadingTeams,
+            }
+        },
+    } = useTeamContext();
+
+    if(isLoadingTeams) {
+        return <Loader/>
+    }
+    
   return (
     <section className="grid grid-cols-3 gap-5">
-        {teams.map((team) => (
+        {teams?.data?.map((team) => (
             <div key={team.id} className="bg-blue-500/10 border-blue-500/20 p-4 rounded-lg">
                 <div className="flex justify-between">
                     <section className="flex flex-col mb-4">

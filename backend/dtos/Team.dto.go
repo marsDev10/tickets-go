@@ -7,7 +7,7 @@ type CreateTeamDto struct {
 }
 
 type UpdateTeamDto struct {
-	Name        *string `json:"name,omitempty" validate:"omitempty,min=3,max=100"`
+	Name        *string `json:"name,omitempty" validate:"omitempty,min=2,max=100"`
 	Description *string `json:"description,omitempty" validate:"omitempty,max=500"`
 	CategoryID  *int    `json:"category_id,omitempty" validate:"omitempty,gte=0"`
 }
